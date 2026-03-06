@@ -3,83 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Budget zł</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { background: #0d0f18; color: #fff; font-family: 'Courier New', monospace; max-width: 430px; margin: 0 auto; padding-bottom: 90px; min-height: 100vh; }
-.header { text-align: center; padding: 20px 18px 8px; font-size: 11px; letter-spacing: 5px; color: #444; position: relative; }
-.save-dot { position: absolute; right: 18px; top: 20px; font-size: 12px; transition: opacity .3s; opacity: 0; }
+.header { text-align: center; padding: 20px 18px 8px; font-size: 11px; letter-spacing: 5px; color: #888; position: relative; }
+.sdot { position: absolute; right: 18px; top: 20px; font-size: 13px; opacity: 0; transition: opacity .3s; }
 .card { background: #161826; border-radius: 20px; padding: 18px; margin: 10px 13px 0; }
-.lbl { font-size: 9px; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-input { background: #1e2235; border: 1px solid #2a2d3e; border-radius: 12px; padding: 13px 14px; color: #fff; font-size: 15px; outline: none; width: 100%; font-family: 'Courier New', monospace; -webkit-appearance: none; }
-input::placeholder { color: #444; }
+.lbl { font-size: 9px; color: #aaa; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
+input { background: #1e2235; border: 1.5px solid #3a3f5c; border-radius: 12px; padding: 13px 14px; color: #fff; font-size: 15px; outline: none; width: 100%; font-family: 'Courier New', monospace; -webkit-appearance: none; }
+input::placeholder { color: #666; }
+input:focus { border-color: #7c6ef5; }
+select { background: #1e2235; border: 1.5px solid #3a3f5c; border-radius: 12px; padding: 13px 14px; color: #fff; font-size: 15px; outline: none; width: 100%; font-family: 'Courier New', monospace; -webkit-appearance: none; appearance: none; }
 button { cursor: pointer; font-family: 'Courier New', monospace; }
-.nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: #161826; border-top: 1px solid #1e2235; display: flex; padding: 10px 0 24px; z-index: 100; }
+.nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: #161826; border-top: 1px solid #2a2d3e; display: flex; padding: 10px 0 24px; z-index: 100; }
 .nav button { flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 0; }
-.tab { display: none; }
-.tab.active { display: block; }
-.exp-row { background: #1e2235; border-radius: 11px; padding: 11px 14px; display: flex; align-items: center; margin-bottom: 7px; }
-.exp-row .en { flex: 1; font-size: 13px; color: #ddd; word-break: break-word; }
-.exp-row .ed { font-size: 10px; color: #444; margin: 0 8px; white-space: nowrap; }
-.exp-row .ea { font-size: 13px; color: #ff6b6b; font-weight: bold; margin-right: 10px; white-space: nowrap; }
-.exp-row .ex { background: none; border: none; color: #555; font-size: 20px; padding: 0; line-height: 1; }
-.sugg-box { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #1e2235; border: 1px solid #2a2d3e; border-radius: 10px; z-index: 30; overflow: hidden; display: none; }
-.sugg-box.show { display: block; }
-.sugg-item { padding: 10px 14px; font-size: 13px; color: #ccc; border-bottom: 1px solid #2a2d3e; }
-.sugg-item:last-child { border-bottom: none; }
-.sugg-item:active { background: #2a2d3e; }
+.tab { display: none; } .tab.active { display: block; }
+.erow { background: #1e2235; border-radius: 11px; padding: 11px 14px; display: flex; align-items: center; margin-bottom: 7px; border: 1px solid #2a2d3e; }
+.erow .en { flex: 1; font-size: 13px; color: #e0e0e0; word-break: break-word; }
+.erow .ed { font-size: 10px; color: #777; margin: 0 8px; white-space: nowrap; }
+.erow .ea { font-size: 13px; color: #ff6b6b; font-weight: bold; margin-right: 10px; white-space: nowrap; }
+.erow .ex { background: none; border: none; color: #666; font-size: 20px; padding: 0; line-height: 1; }
+.sugg { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #1e2235; border: 1.5px solid #3a3f5c; border-radius: 10px; z-index: 30; overflow: hidden; display: none; }
+.sugg.show { display: block; }
+.sugg-i { padding: 10px 14px; font-size: 13px; color: #ddd; border-bottom: 1px solid #2a2d3e; }
+.sugg-i:last-child { border-bottom: none; }
+.sugg-i:active { background: #2a2d3e; }
+.rinfo { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #2a2d3e; }
+.rinfo:last-child { border-bottom: none; }
 .chart-wrap { display: flex; align-items: flex-end; height: 120px; }
 .stat-box { display: flex; justify-content: space-around; margin-top: 16px; padding: 14px; background: #1e2235; border-radius: 14px; }
-.stat-item { text-align: center; }
 </style>
 </head>
 <body>
 
-<div class="header">BUDGET <span id="sdot" class="save-dot"></span></div>
+<div class="header">BUDGET <span id="sdot" class="sdot"></span></div>
 
 <!-- HOME -->
 <div id="tab-home" class="tab active">
+
   <div class="card" style="margin-top:12px">
     <div class="lbl">ОБЩИЙ БАЛАНС</div>
-    <div style="display:flex;align-items:baseline;gap:6px">
-      <span id="tc" style="font-size:13px;color:#f5a623">zł</span>
-      <span id="tb" style="font-size:60px;font-weight:bold;color:#f5a623;line-height:1;letter-spacing:-2px">495</span>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:14px">
+      <span id="tc" style="font-size:13px;color:#e6930a">zł</span>
+      <span id="tb" style="font-size:60px;font-weight:bold;color:#e6930a;line-height:1;letter-spacing:-2px">0</span>
     </div>
-    <div style="display:flex;gap:22px;margin-top:14px">
-      <div><div style="font-size:7px;color:#444;letter-spacing:1.5px">СТАРТОВЫЙ</div><div id="is" style="font-size:14px;color:#f5a623;margin-top:3px">495 zł</div></div>
-      <div><div style="font-size:7px;color:#444;letter-spacing:1.5px">ПОТРАЧЕНО</div><div id="ip" style="font-size:14px;color:#ff6b6b;margin-top:3px">0 zł</div></div>
-      <div><div style="font-size:7px;color:#444;letter-spacing:1.5px">ДНЕЙ</div><div id="id" style="font-size:14px;color:#888;margin-top:3px">1</div></div>
+    <div style="display:flex;gap:8px">
+      <input id="topup-amt" placeholder="Пополнить на..." type="number" inputmode="decimal" min="0" style="flex:1;padding:11px 13px;font-size:14px">
+      <button onclick="topUp()" style="background:#f5a623;border:none;border-radius:12px;padding:11px 18px;color:#fff;font-weight:bold;font-size:13px;white-space:nowrap;flex-shrink:0">+ Добавить</button>
     </div>
   </div>
 
   <div class="card">
-    <div class="lbl">ДНЕВНОЙ ОСТАТОК</div>
+    <div class="lbl">ДОСТУПНО СЕГОДНЯ</div>
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div style="display:flex;align-items:baseline;gap:4px">
-        <span id="dc" style="font-size:12px;color:#ff6b35">zł</span>
-        <span id="db" style="font-size:52px;font-weight:bold;color:#ff6b35;line-height:1;letter-spacing:-2px">33</span>
+        <span id="dc" style="font-size:12px;color:#e05555">zł</span>
+        <span id="db" style="font-size:54px;font-weight:bold;color:#e05555;line-height:1;letter-spacing:-2px">0</span>
       </div>
       <div style="text-align:right">
-        <div style="font-size:8px;color:#444;letter-spacing:1.5px">ПОПОЛНЕНИЕ</div>
-        <div id="ti" style="color:#4ecdc4;font-size:13px;margin-top:4px">+33 в 00:00</div>
+        <div style="font-size:8px;color:#aaa;letter-spacing:1.5px">ЛИМИТ В ДЕНЬ</div>
+        <div id="lim-lbl" style="color:#7c6ef5;font-size:20px;font-weight:bold;margin-top:3px">40 zł</div>
+        <div style="font-size:8px;color:#444;margin-top:6px">СЛЕДУЮЩЕЕ СПИСАНИЕ</div>
+        <div id="timer" style="color:#ccc;font-size:12px;margin-top:2px">—</div>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:9px;color:#bbb">Потрачено сегодня</span>
+        <span id="day-pct-lbl" style="font-size:9px;color:#bbb">0 zł</span>
+      </div>
+      <div style="background:#2a2d3e;border-radius:4px;height:5px;overflow:hidden">
+        <div id="day-bar" style="height:100%;border-radius:4px;background:#4ecdc4;width:0%;transition:width .4s"></div>
       </div>
     </div>
   </div>
 
-  <div style="padding:8px 16px 2px">
-    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-      <span style="font-size:9px;color:#444">Общий баланс</span>
-      <span id="pl" style="font-size:9px;color:#444">100%</span>
+  <div class="card" style="display:flex;justify-content:space-around;padding:14px 10px">
+    <div style="text-align:center">
+      <div style="font-size:8px;color:#aaa;letter-spacing:1.5px;margin-bottom:5px">ПОТРАЧЕНО ВСЕГО</div>
+      <div id="s-all" style="font-size:15px;color:#e05555;font-weight:bold">0 zł</div>
     </div>
-    <div style="background:#1e2235;border-radius:4px;height:5px;overflow:hidden">
-      <div id="pf" style="height:100%;border-radius:4px;background:#4ecdc4;transition:width .4s;width:100%"></div>
+    <div style="width:1px;background:#2a2d3e"></div>
+    <div style="text-align:center">
+      <div style="font-size:8px;color:#aaa;letter-spacing:1.5px;margin-bottom:5px">СЕГОДНЯ</div>
+      <div id="s-tod" style="font-size:15px;color:#7c6ef5;font-weight:bold">0 zł</div>
+    </div>
+    <div style="width:1px;background:#2a2d3e"></div>
+    <div style="text-align:center">
+      <div style="font-size:8px;color:#aaa;letter-spacing:1.5px;margin-bottom:5px">ДНЕЙ</div>
+      <div id="s-days" style="font-size:15px;color:#ccc;font-weight:bold">0</div>
     </div>
   </div>
 
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px">
-    <span style="font-size:12px;color:#bbb">Сегодня: <b id="tl"></b></span>
-    <span id="dn" style="background:#1e2235;border:1px solid #2a2d3e;border-radius:8px;padding:3px 10px;font-size:10px;color:#666">День 1</span>
+  <div class="card" style="padding:12px 18px">
+    <span style="font-size:12px;color:#bbb">Сегодня: <b id="tl" style="color:#fff"></b></span>
   </div>
 
   <div class="card">
@@ -87,19 +107,19 @@ button { cursor: pointer; font-family: 'Courier New', monospace; }
     <div style="display:flex;gap:7px;position:relative">
       <div style="flex:1;position:relative">
         <input id="idesc" placeholder="Описание..." autocomplete="off">
-        <div id="sbox" class="sugg-box"></div>
+        <div id="sbox" class="sugg"></div>
       </div>
       <input id="iamt" placeholder="zł" type="number" min="0" inputmode="decimal" style="width:70px;text-align:center;padding:13px 8px">
-      <button onclick="addExp()" style="width:50px;height:50px;background:#4ecdc4;border-radius:12px;border:none;color:#0d0f18;font-size:28px;font-weight:bold;flex-shrink:0">−</button>
+      <button onclick="addExp()" style="width:50px;height:50px;background:#7c6ef5;border-radius:12px;border:none;color:#fff;font-size:28px;font-weight:bold;flex-shrink:0;display:flex;align-items:center;justify-content:center">−</button>
     </div>
   </div>
 
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div class="lbl" style="margin:0">ИСТОРИЯ ТРАТ</div>
-      <button onclick="resetAll()" style="background:#1e2235;border:1px solid #2a2d3e;border-radius:8px;padding:5px 12px;color:#666;font-size:10px">Сбросить всё</button>
+      <button onclick="clearExp()" style="background:#1e2235;border:1px solid #3a3f5c;border-radius:8px;padding:5px 12px;color:#aaa;font-size:10px">Очистить</button>
     </div>
-    <div id="elist"><div style="color:#333;font-size:13px;text-align:center;padding:20px 0">Трат нет</div></div>
+    <div id="elist"><div style="color:#555;font-size:13px;text-align:center;padding:20px 0">Трат нет</div></div>
   </div>
 </div>
 
@@ -109,16 +129,16 @@ button { cursor: pointer; font-family: 'Courier New', monospace; }
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <div class="lbl" style="margin:0">ТРАТЫ ПО ДНЯМ</div>
       <div style="display:flex;gap:6px">
-        <button id="b7"  onclick="setRange(7)"  style="background:#4ecdc4;border:none;border-radius:8px;padding:5px 14px;color:#0d0f18;font-size:11px;font-weight:bold">7 дн</button>
-        <button id="b30" onclick="setRange(30)" style="background:#1e2235;border:none;border-radius:8px;padding:5px 14px;color:#666;font-size:11px">30 дн</button>
+        <button id="b7"  onclick="setRange(7)"  style="background:#7c6ef5;border:none;border-radius:8px;padding:5px 14px;color:#fff;font-size:11px;font-weight:bold">7 дн</button>
+        <button id="b30" onclick="setRange(30)" style="background:#eceef6;border:none;border-radius:8px;padding:5px 14px;color:#999;font-size:11px">30 дн</button>
       </div>
     </div>
     <div id="cbars" class="chart-wrap" style="gap:4px"></div>
     <div id="clbls" style="display:flex;gap:4px;margin-top:4px"></div>
     <div class="stat-box">
-      <div class="stat-item"><div style="font-size:8px;color:#555;letter-spacing:1.5px;margin-bottom:4px">СЕГОДНЯ</div><div id="s1" style="font-size:18px;font-weight:bold;color:#ff6b35">0 zł</div></div>
-      <div class="stat-item"><div style="font-size:8px;color:#555;letter-spacing:1.5px;margin-bottom:4px">СРЕДНЕЕ</div><div id="s2" style="font-size:18px;font-weight:bold;color:#4ecdc4">0 zł</div></div>
-      <div class="stat-item"><div style="font-size:8px;color:#555;letter-spacing:1.5px;margin-bottom:4px">МАКСИМУМ</div><div id="s3" style="font-size:18px;font-weight:bold;color:#f5a623">0 zł</div></div>
+      <div style="text-align:center"><div style="font-size:8px;color:#aaa;letter-spacing:1.5px;margin-bottom:4px">СЕГОДНЯ</div><div id="c1" style="font-size:18px;font-weight:bold;color:#e05555">0 zł</div></div>
+      <div style="text-align:center"><div style="font-size:8px;color:#aaa;letter-spacing:1.5px;margin-bottom:4px">СРЕДНЕЕ</div><div id="c2" style="font-size:18px;font-weight:bold;color:#7c6ef5">0 zł</div></div>
+      <div style="text-align:center"><div style="font-size:8px;color:#aaa;letter-spacing:1.5px;margin-bottom:4px">МАКСИМУМ</div><div id="c3" style="font-size:18px;font-weight:bold;color:#f5a623">0 zł</div></div>
     </div>
   </div>
 </div>
@@ -127,42 +147,78 @@ button { cursor: pointer; font-family: 'Courier New', monospace; }
 <div id="tab-settings" class="tab">
   <div class="card" style="margin-top:12px">
     <div class="lbl">НАСТРОЙКИ</div>
+
     <div style="margin-bottom:14px">
-      <div style="font-size:11px;color:#777;margin-bottom:7px">Стартовый баланс (zł)</div>
-      <input id="ss" type="number" inputmode="decimal" value="495" style="font-size:16px;padding:13px 15px">
+      <div style="font-size:11px;color:#ccc;margin-bottom:7px">Общий баланс (zł) — установить вручную</div>
+      <input id="set-bal" type="number" inputmode="decimal" placeholder="Например: 1000">
     </div>
+
     <div style="margin-bottom:14px">
-      <div style="font-size:11px;color:#777;margin-bottom:7px">Ежедневное пополнение (zł)</div>
-      <input id="st" type="number" inputmode="decimal" value="33" style="font-size:16px;padding:13px 15px">
+      <div style="font-size:11px;color:#ccc;margin-bottom:7px">Доступно сегодня (zł) — установить вручную</div>
+      <input id="set-day" type="number" inputmode="decimal" placeholder="Например: 56">
     </div>
-    <button id="sbtn" onclick="saveSettings()" style="width:100%;background:#f5a623;border:none;border-radius:14px;padding:15px;color:#0d0f18;font-size:14px;font-weight:bold;letter-spacing:2px">СОХРАНИТЬ</button>
-    <div style="margin-top:10px;font-size:10px;color:#333;text-align:center">Сохранение сбросит текущие данные</div>
+
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:#ccc;margin-bottom:7px">Дневной лимит (zł)</div>
+      <input id="set-lim" type="number" inputmode="decimal" placeholder="Например: 40">
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;color:#ccc;margin-bottom:7px">Время ежедневного списания (ЧЧ:ММ)</div>
+      <input id="set-time" type="time" placeholder="00:00" style="font-size:16px;padding:13px 15px;color:#fff;background:#1e2235;border:1px solid #2a2d3e;border-radius:12px;width:100%;outline:none;-webkit-appearance:none;color-scheme:dark">
+    </div>
+
+    <button id="sbtn" onclick="saveSettings()" style="width:100%;background:#7c6ef5;border:none;border-radius:14px;padding:15px;color:#fff;font-size:14px;font-weight:bold;letter-spacing:2px">СОХРАНИТЬ</button>
+    <div style="margin-top:8px;font-size:10px;color:#666;text-align:center">История трат при сохранении не сбрасывается</div>
   </div>
+
   <div class="card">
-    <div class="lbl">СОСТОЯНИЕ</div>
-    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2235"><span style="font-size:12px;color:#666">Общий баланс</span><span id="st1" style="font-size:12px;color:#4ecdc4;font-weight:bold">—</span></div>
-    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2235"><span style="font-size:12px;color:#666">Дневной баланс</span><span id="st2" style="font-size:12px;color:#ff6b35;font-weight:bold">—</span></div>
-    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e2235"><span style="font-size:12px;color:#666">Записей</span><span id="st3" style="font-size:12px;color:#888;font-weight:bold">—</span></div>
-    <div style="display:flex;justify-content:space-between;padding:10px 0"><span style="font-size:12px;color:#666">Пополнение через</span><span id="st4" style="font-size:12px;color:#f5a623;font-weight:bold">—</span></div>
+    <div class="lbl">ТЕКУЩЕЕ СОСТОЯНИЕ</div>
+    <div class="rinfo"><span style="font-size:12px;color:#bbb">Общий баланс</span><span id="i-ob" style="font-size:12px;color:#e6930a;font-weight:bold">—</span></div>
+    <div class="rinfo"><span style="font-size:12px;color:#bbb">Доступно сегодня</span><span id="i-day" style="font-size:12px;color:#e05555;font-weight:bold">—</span></div>
+    <div class="rinfo"><span style="font-size:12px;color:#bbb">Дневной лимит</span><span id="i-lim" style="font-size:12px;color:#7c6ef5;font-weight:bold">—</span></div>
+    <div class="rinfo"><span style="font-size:12px;color:#bbb">Время списания</span><span id="i-time" style="font-size:12px;color:#aaa;font-weight:bold">—</span></div>
+    <div class="rinfo"><span style="font-size:12px;color:#bbb">Следующее списание через</span><span id="i-next" style="font-size:12px;color:#aaa;font-weight:bold">—</span></div>
+  </div>
+
+  <div class="card" style="border:1px solid #3a1e1e;margin-bottom:10px">
+    <div class="lbl" style="color:#ff6b6b">ОПАСНАЯ ЗОНА</div>
+    <button onclick="fullReset()" style="width:100%;background:transparent;border:1px solid #ff4d4d;border-radius:12px;padding:13px;color:#ff6b6b;font-size:13px;font-weight:bold">Сбросить всё полностью</button>
   </div>
 </div>
 
 <!-- NAV -->
 <div class="nav">
-  <button onclick="showTab('home')"><span id="nh" style="font-size:20px;color:#f5a623">◉</span><span id="nl" style="font-size:9px;color:#f5a623;letter-spacing:1.5px">Главная</span></button>
-  <button onclick="showTab('chart')"><span id="nc" style="font-size:20px;color:#333">▦</span><span id="ncl" style="font-size:9px;color:#333;letter-spacing:1.5px">График</span></button>
-  <button onclick="showTab('settings')"><span id="ns" style="font-size:20px;color:#333">⚙</span><span id="nsl" style="font-size:9px;color:#333;letter-spacing:1.5px">Настройки</span></button>
+  <button onclick="showTab('home')">
+    <span id="nh" style="font-size:20px;color:#f5a623">◉</span>
+    <span id="nl" style="font-size:9px;color:#f5a623;letter-spacing:1.5px">Главная</span>
+  </button>
+  <button onclick="showTab('chart')">
+    <span id="nc" style="font-size:20px;color:#333">▦</span>
+    <span id="ncl" style="font-size:9px;color:#333;letter-spacing:1.5px">График</span>
+  </button>
+  <button onclick="showTab('settings')">
+    <span id="ns" style="font-size:20px;color:#333">⚙</span>
+    <span id="nsl" style="font-size:9px;color:#333;letter-spacing:1.5px">Настройки</span>
+  </button>
 </div>
 
 <script>
 const TG = window.Telegram?.WebApp;
 if (TG) { TG.ready(); TG.expand(); }
 
-const KEY = 'budget_v1';
-let S = { totalBalance:495, dailyBalance:33, expenses:[], lastTopUpDate:'', settings:{startBalance:495,dailyTopUp:33} };
-let CR = 7, saveT = null;
+const KEY = 'budget_zl_v5';
+let S = {
+  totalBalance: 0,
+  dayBalance: 0,
+  dayLimit: 40,
+  resetTime: '00:00',
+  lastResetDate: '',
+  expenses: []
+};
+let CR = 7, saveTimer = null;
 
-// CloudStorage (Telegram) + localStorage fallback
+// ── Storage ───────────────────────────────────────────────────────
 function tgSave(data) {
   return new Promise(resolve => {
     const json = JSON.stringify(data);
@@ -189,148 +245,253 @@ function tgLoad() {
   });
 }
 
-function dot(t,c) { const d=g('sdot'); d.textContent=t; d.style.color=c; d.style.opacity=1; setTimeout(()=>d.style.opacity=0,2000); }
-function scheduleSave() { if(saveT)clearTimeout(saveT); dot('💾','#888'); saveT=setTimeout(async()=>{ await tgSave(S); dot('✓','#4ecdc4'); },600); }
+function dot(t, c) {
+  const d = g('sdot');
+  d.textContent = t; d.style.color = c; d.style.opacity = 1;
+  setTimeout(() => d.style.opacity = 0, 2000);
+}
+function scheduleSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  dot('💾', '#888');
+  saveTimer = setTimeout(async () => { await tgSave(S); dot('✓', '#4ecdc4'); }, 600);
+}
 
+// ── Ежедневное начисление ────────────────────────────────────────
+// Логика:
+// Каждый день в resetTime (ЧЧ:ММ):
+//   dayBalance += dayLimit   — остаток переносится + новый лимит
+//   totalBalance НЕ меняется при ежедневном начислении — только от трат и пополнения
+
+function getResetPeriod() {
+  const now = new Date();
+  const d = new Date(now);
+  const [rh, rm] = (S.resetTime || '00:00').split(':').map(Number);
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const resetMins = rh * 60 + rm;
+  if (nowMins < resetMins) d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
+function checkDailyReset() {
+  const period = getResetPeriod();
+  if (S.lastResetDate === period) return false;
+  // Просто добавляем дневной лимит к доступному остатку
+  S.dayBalance = parseFloat((S.dayBalance + S.dayLimit).toFixed(2));
+  S.lastResetDate = period;
+  return true;
+}
+
+// ── Init ──────────────────────────────────────────────────────────
 async function init() {
   g('tl').textContent = new Date().toLocaleDateString('ru-RU');
-  dot('⏳','#f5a623');
+  dot('⏳', '#7c6ef5');
   const loaded = await tgLoad();
-  if (loaded) S = loaded;
-  const today = new Date().toDateString();
-  if (S.lastTopUpDate !== today) {
-    S.totalBalance = +((S.totalBalance + S.settings.dailyTopUp).toFixed(2));
-    S.dailyBalance = S.settings.dailyTopUp;
-    S.lastTopUpDate = today;
-    await tgSave(S);
-    dot('✓','#4ecdc4');
-  } else dot('','#000');
-  g('ss').value = S.settings.startBalance;
-  g('st').value = S.settings.dailyTopUp;
+  if (loaded) S = { ...S, ...loaded };
+  if (checkDailyReset()) await tgSave(S);
+  g('set-bal').value  = S.totalBalance > 0 ? S.totalBalance : '';
+  g('set-day').value  = S.dayBalance !== 0 ? S.dayBalance : '';
+  g('set-lim').value  = S.dayLimit;
+  g('set-time').value = S.resetTime || '00:00';
+  dot('', '#000');
   render();
-  setInterval(updTimer, 30000);
+  setInterval(() => {
+    updateTimer();
+    if (checkDailyReset()) { tgSave(S); render(); }
+  }, 60000);
   g('idesc').addEventListener('input', onDesc);
-  g('idesc').addEventListener('blur', ()=>setTimeout(()=>g('sbox').classList.remove('show'),200));
-  g('idesc').addEventListener('keydown', e=>{ if(e.key==='Enter') addExp(); });
-  g('iamt').addEventListener('keydown',  e=>{ if(e.key==='Enter') addExp(); });
+  g('idesc').addEventListener('blur', () => setTimeout(() => g('sbox').classList.remove('show'), 200));
+  g('idesc').addEventListener('keydown', e => { if (e.key === 'Enter') addExp(); });
+  g('iamt').addEventListener('keydown',  e => { if (e.key === 'Enter') addExp(); });
 }
 
+// ── Render ────────────────────────────────────────────────────────
 function render() {
-  const tN=S.totalBalance<0, dN=S.dailyBalance<0;
-  const pct=Math.min(100,Math.max(0,S.totalBalance/S.settings.startBalance*100));
-  const days=Math.max(1,[...new Set(S.expenses.map(e=>e.date))].length);
-  g('tb').textContent=(tN?'−':'')+Math.abs(S.totalBalance).toFixed(0);
-  g('tb').style.color=tN?'#ff4d4d':'#f5a623'; g('tc').style.color=tN?'#ff4d4d':'#f5a623';
-  g('db').textContent=(dN?'−':'')+Math.abs(S.dailyBalance).toFixed(0);
-  g('db').style.color=dN?'#ff4d4d':'#ff6b35'; g('dc').style.color=dN?'#ff4d4d':'#ff6b35';
-  g('is').textContent=S.settings.startBalance+' zł';
-  g('ip').textContent=(S.settings.startBalance-S.totalBalance).toFixed(0)+' zł';
-  g('id').textContent=days;
-  g('pl').textContent=pct.toFixed(0)+'%';
-  g('pf').style.width=pct+'%'; g('pf').style.background=pct>30?'#4ecdc4':'#ff4d4d';
-  g('dn').textContent='День '+days;
-  g('st1').textContent=S.totalBalance.toFixed(0)+' zł'; g('st1').style.color=S.totalBalance<0?'#ff4d4d':'#4ecdc4';
-  g('st2').textContent=S.dailyBalance.toFixed(0)+' zł'; g('st2').style.color=S.dailyBalance<0?'#ff4d4d':'#ff6b35';
-  g('st3').textContent=S.expenses.length;
-  updTimer(); renderList(); renderChart();
+  const dNeg = S.dayBalance < 0;
+  const tNeg = S.totalBalance < 0;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todaySpent = S.expenses.filter(e => e.date === todayStr).reduce((s, e) => s + e.amount, 0);
+
+  g('tb').textContent = (tNeg?'−':'') + Math.abs(S.totalBalance).toFixed(0);
+  g('tb').style.color = tNeg ? '#ff4d4d' : '#7c6ef5';
+  g('tc').style.color = tNeg ? '#ff4d4d' : '#7c6ef5';
+
+  g('db').textContent = (dNeg?'−':'') + Math.abs(S.dayBalance).toFixed(0);
+  g('db').style.color = dNeg ? '#e05555' : '#e05555';
+  g('dc').style.color = dNeg ? '#e05555' : '#e05555';
+  g('lim-lbl').textContent = S.dayLimit + ' zł';
+
+  const pct = S.dayLimit > 0 ? Math.min(100, (todaySpent / S.dayLimit) * 100) : 0;
+  g('day-bar').style.width      = pct + '%';
+  g('day-bar').style.background = pct >= 100 ? '#ff4d4d' : pct > 70 ? '#7c6ef5' : '#4ecdc4';
+  g('day-pct-lbl').textContent  = todaySpent.toFixed(0) + ' / ' + S.dayLimit + ' zł';
+
+  const allSpent   = S.expenses.reduce((s, e) => s + e.amount, 0);
+  const activeDays = [...new Set(S.expenses.map(e => e.date))].length;
+  g('s-all').textContent  = allSpent.toFixed(0) + ' zł';
+  g('s-tod').textContent  = todaySpent.toFixed(0) + ' zł';
+  g('s-days').textContent = activeDays;
+
+  g('i-ob').textContent  = S.totalBalance.toFixed(0) + ' zł';
+  g('i-ob').style.color  = tNeg ? '#ff4d4d' : '#7c6ef5';
+  g('i-day').textContent = S.dayBalance.toFixed(0) + ' zł';
+  g('i-day').style.color = dNeg ? '#e05555' : '#7c6ef5';
+  g('i-lim').textContent = S.dayLimit + ' zł';
+  g('i-time').textContent = S.resetTime || '00:00';
+
+  updateTimer();
+  renderList();
+  renderChart();
 }
 
-function updTimer() {
-  const now=new Date(),mid=new Date(now); mid.setHours(24,0,0,0);
-  const diff=mid-now, h=String(Math.floor(diff/3600000)).padStart(2,'0'), m=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
-  g('ti').textContent=`+${S.settings.dailyTopUp} в ${h}:${m}`; g('st4').textContent=h+':'+m;
+function updateTimer() {
+  const now  = new Date();
+  const next = new Date(now);
+  const [rh, rm] = (S.resetTime || '00:00').split(':').map(Number);
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const resetMins = rh * 60 + rm;
+  if (nowMins >= resetMins) next.setDate(next.getDate() + 1);
+  next.setHours(rh, rm, 0, 0);
+  const diff = next - now;
+  const h = String(Math.floor(diff / 3600000)).padStart(2,'0');
+  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+  g('timer').textContent  = h + ':' + m;
+  g('i-next').textContent = h + ':' + m;
 }
 
 function renderList() {
-  const el=g('elist');
-  if(!S.expenses.length){el.innerHTML='<div style="color:#333;font-size:13px;text-align:center;padding:20px 0">Трат нет</div>';return;}
-  el.innerHTML=S.expenses.map(e=>`<div class="exp-row"><span class="en">${e.desc}</span><span class="ed">${e.date.split('-').reverse().join('.')}</span><span class="ea">−${e.amount} zł</span><button class="ex" onclick="delExp(${e.id})">×</button></div>`).join('');
+  const el = g('elist');
+  if (!S.expenses.length) {
+    el.innerHTML = '<div style="color:#555;font-size:13px;text-align:center;padding:20px 0">Трат нет</div>';
+    return;
+  }
+  el.innerHTML = S.expenses.map(e =>
+    `<div class="erow">
+      <span class="en">${e.desc}</span>
+      <span class="ed">${e.date.split('-').reverse().join('.')}</span>
+      <span class="ea">−${e.amount} zł</span>
+      <button class="ex" onclick="delExp(${e.id})">×</button>
+    </div>`).join('');
 }
 
 function renderChart() {
-  const ts=new Date().toISOString().split('T')[0];
-  const data=Array.from({length:CR},(_,i)=>{
-    const d=new Date(); d.setDate(d.getDate()-(CR-1-i));
-    const ds=d.toISOString().split('T')[0];
-    return{date:ds,label:`${d.getDate()}.${String(d.getMonth()+1).padStart(2,'0')}`,total:S.expenses.filter(e=>e.date===ds).reduce((s,e)=>s+e.amount,0)};
+  const todayStr = new Date().toISOString().split('T')[0];
+  const data = Array.from({ length: CR }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (CR-1-i));
+    const ds = d.toISOString().split('T')[0];
+    return { date: ds, label: `${d.getDate()}.${String(d.getMonth()+1).padStart(2,'0')}`, total: S.expenses.filter(e=>e.date===ds).reduce((s,e)=>s+e.amount,0) };
   });
-  const mx=Math.max(...data.map(d=>d.total),1), gap=CR===30?2:4;
-  g('cbars').style.gap=gap+'px'; g('clbls').style.gap=gap+'px';
-  g('cbars').innerHTML=data.map(d=>{
-    const h=d.total>0?Math.max(4,d.total/mx*112):2, bg=d.date===ts?'#f5a623':d.total>0?'#ff6b35':'#1e2235';
-    const lbl=CR<=7&&d.total>0?`<div style="font-size:7px;color:#666;margin-bottom:2px">${d.total}</div>`:'';
+  const mx  = Math.max(...data.map(d=>d.total), S.dayLimit, 1);
+  const gap = CR === 30 ? 2 : 4;
+  g('cbars').style.gap = gap + 'px';
+  g('clbls').style.gap = gap + 'px';
+  g('cbars').innerHTML = data.map(d => {
+    const h   = d.total > 0 ? Math.max(4, (d.total/mx)*112) : 2;
+    const over = d.total > S.dayLimit;
+    const bg  = over ? '#ff4d4d' : d.date===todayStr ? '#7c6ef5' : d.total>0 ? '#ff6b35' : '#1e2235';
+    const lbl = CR<=7 && d.total>0 ? `<div style="font-size:7px;color:#666;margin-bottom:2px">${d.total}</div>` : '';
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">${lbl}<div style="width:100%;height:${h}px;background:${bg};border-radius:3px 3px 0 0"></div></div>`;
   }).join('');
-  g('clbls').innerHTML=data.map((d,i)=>`<div style="flex:1;text-align:center;font-size:${CR===30?5:8}px;color:${d.date===ts?'#f5a623':'#444'}">${CR<=7?d.label:i%5===0?d.label:''}</div>`).join('');
-  const ts2=S.expenses.filter(e=>e.date===ts).reduce((s,e)=>s+e.amount,0);
-  const dws=data.filter(d=>d.total>0), avg=dws.length?dws.reduce((s,d)=>s+d.total,0)/dws.length:0;
-  g('s1').textContent=ts2.toFixed(0)+' zł'; g('s2').textContent=avg.toFixed(0)+' zł'; g('s3').textContent=Math.max(...data.map(d=>d.total),0).toFixed(0)+' zł';
+  g('clbls').innerHTML = data.map((d,i) =>
+    `<div style="flex:1;text-align:center;font-size:${CR===30?5:8}px;color:${d.date===todayStr?'#7c6ef5':'#aaa'}">${CR<=7?d.label:i%5===0?d.label:''}</div>`
+  ).join('');
+  const todaySpent = S.expenses.filter(e=>e.date===todayStr).reduce((s,e)=>s+e.amount,0);
+  const dws = data.filter(d=>d.total>0);
+  const avg = dws.length ? dws.reduce((s,d)=>s+d.total,0)/dws.length : 0;
+  g('c1').textContent = todaySpent.toFixed(0)+' zł';
+  g('c2').textContent = avg.toFixed(0)+' zł';
+  g('c3').textContent = Math.max(...data.map(d=>d.total),0).toFixed(0)+' zł';
+}
+
+// ── Actions ───────────────────────────────────────────────────────
+function topUp() {
+  const amt = parseFloat(g('topup-amt').value);
+  if (isNaN(amt) || amt <= 0) return;
+  S.totalBalance = parseFloat((S.totalBalance + amt).toFixed(2));
+  g('topup-amt').value = '';
+  scheduleSave(); render();
 }
 
 function addExp() {
-  const desc=g('idesc').value.trim(), amt=parseFloat(g('iamt').value);
-  if(!desc||isNaN(amt)||amt<=0) return;
-  const today=new Date().toISOString().split('T')[0];
-  S.expenses.unshift({id:Date.now(),desc,amount:amt,date:today});
-  S.totalBalance=+((S.totalBalance-amt).toFixed(2));
-  S.dailyBalance=+((S.dailyBalance-amt).toFixed(2));
-  g('idesc').value=''; g('iamt').value=''; g('sbox').classList.remove('show');
+  const desc = g('idesc').value.trim();
+  const amt  = parseFloat(g('iamt').value);
+  if (!desc || isNaN(amt) || amt <= 0) return;
+  const today = new Date().toISOString().split('T')[0];
+  S.expenses.unshift({ id: Date.now(), desc, amount: amt, date: today });
+  S.dayBalance   = parseFloat((S.dayBalance - amt).toFixed(2));
+  S.totalBalance = parseFloat((S.totalBalance - amt).toFixed(2));
+  g('idesc').value = ''; g('iamt').value = '';
+  g('sbox').classList.remove('show');
   scheduleSave(); render();
 }
 
 function delExp(id) {
-  const e=S.expenses.find(x=>x.id===id); if(!e) return;
-  S.expenses=S.expenses.filter(x=>x.id!==id);
-  S.totalBalance=+((S.totalBalance+e.amount).toFixed(2));
-  S.dailyBalance=+((S.dailyBalance+e.amount).toFixed(2));
+  const e = S.expenses.find(x => x.id === id);
+  if (!e) return;
+  S.expenses     = S.expenses.filter(x => x.id !== id);
+  S.dayBalance   = parseFloat((S.dayBalance + e.amount).toFixed(2));
+  S.totalBalance = parseFloat((S.totalBalance + e.amount).toFixed(2));
   scheduleSave(); render();
 }
 
-function resetAll() {
-  if(!confirm('Сбросить всю историю?')) return;
-  S.expenses=[]; S.totalBalance=S.settings.startBalance; S.dailyBalance=S.settings.dailyTopUp;
+function clearExp() {
+  if (!confirm('Очистить историю трат?\nБалансы не изменятся.')) return;
+  S.expenses = [];
   scheduleSave(); render();
 }
 
 function saveSettings() {
-  const sb=parseFloat(g('ss').value), dt=parseFloat(g('st').value);
-  if(isNaN(sb)||isNaN(dt)||sb<=0||dt<0) return;
-  S.settings={startBalance:sb,dailyTopUp:dt}; S.totalBalance=sb; S.dailyBalance=dt; S.expenses=[]; S.lastTopUpDate=new Date().toDateString();
+  const bal = parseFloat(g('set-bal').value);
+  const lim = parseFloat(g('set-lim').value);
+  const dayVal  = parseFloat(g('set-day').value);
+  const timeVal = g('set-time').value;
+  if (!isNaN(bal) && g('set-bal').value !== '') S.totalBalance = bal;
+  if (!isNaN(dayVal) && g('set-day').value !== '') S.dayBalance = dayVal;
+  if (!isNaN(lim) && lim > 0) S.dayLimit = lim;
+  if (timeVal) S.resetTime = timeVal;
   scheduleSave();
-  const b=g('sbtn'); b.textContent='✓ СОХРАНЕНО'; b.style.background='#4ecdc4';
-  setTimeout(()=>{b.textContent='СОХРАНИТЬ';b.style.background='#f5a623';},2000);
+  const btn = g('sbtn');
+  btn.textContent = '✓ СОХРАНЕНО'; btn.style.background = '#4caf7d';
+  setTimeout(() => { btn.textContent = 'СОХРАНИТЬ'; btn.style.background = '#7c6ef5'; }, 2000);
   render();
 }
 
+function fullReset() {
+  if (!confirm('Сбросить ВСЁ?\nОбщий баланс и история обнулятся.')) return;
+  S = { totalBalance:0, dayBalance:0, dayLimit:40, resetTime:'00:00', lastResetDate:'', expenses:[] };
+  g('set-bal').value=''; g('set-day').value=''; g('set-lim').value=40; g('set-time').value='00:00';
+  scheduleSave(); render();
+}
+
+// ── Suggestions ───────────────────────────────────────────────────
 function onDesc() {
-  const val=this.value.trim().toLowerCase(), box=g('sbox');
-  if(!val){box.classList.remove('show');return;}
-  const m=[...new Set(S.expenses.map(e=>e.desc))].filter(d=>d.toLowerCase().startsWith(val)).slice(0,5);
-  if(!m.length){box.classList.remove('show');return;}
-  box.innerHTML=m.map(s=>`<div class="sugg-item" ontouchstart="" onclick="pickS('${s.replace(/'/g,"\\'")}')">${s}</div>`).join('');
+  const val = this.value.trim().toLowerCase();
+  const box = g('sbox');
+  if (!val) { box.classList.remove('show'); return; }
+  const m = [...new Set(S.expenses.map(e=>e.desc))].filter(d=>d.toLowerCase().startsWith(val)).slice(0,5);
+  if (!m.length) { box.classList.remove('show'); return; }
+  box.innerHTML = m.map(s=>`<div class="sugg-i" ontouchstart="" onclick="pickS('${s.replace(/'/g,"\\'")}')">${s}</div>`).join('');
   box.classList.add('show');
 }
-function pickS(v){g('idesc').value=v;g('sbox').classList.remove('show');}
+function pickS(v) { g('idesc').value=v; g('sbox').classList.remove('show'); }
 
+// ── Tabs ──────────────────────────────────────────────────────────
 function showTab(n) {
-  ['home','chart','settings'].forEach(t=>{
-    document.getElementById('tab-'+t).classList.toggle('active',t===n);
-    const a=t===n;
-    if(t==='home'){g('nh').style.color=a?'#f5a623':'#333';g('nl').style.color=a?'#f5a623':'#333';}
-    if(t==='chart'){g('nc').style.color=a?'#f5a623':'#333';g('ncl').style.color=a?'#f5a623':'#333';}
-    if(t==='settings'){g('ns').style.color=a?'#f5a623':'#333';g('nsl').style.color=a?'#f5a623':'#333';}
+  ['home','chart','settings'].forEach(t => {
+    g('tab-'+t).classList.toggle('active', t===n);
+    const a = t===n;
+    if(t==='home')    { g('nh').style.color=a?'#7c6ef5':'#ccc'; g('nl').style.color=a?'#7c6ef5':'#ccc'; }
+    if(t==='chart')   { g('nc').style.color=a?'#7c6ef5':'#ccc'; g('ncl').style.color=a?'#7c6ef5':'#ccc'; }
+    if(t==='settings'){ g('ns').style.color=a?'#7c6ef5':'#ccc'; g('nsl').style.color=a?'#7c6ef5':'#ccc'; }
   });
-  if(n==='chart') renderChart();
+  if (n==='chart') renderChart();
 }
-
 function setRange(r) {
   CR=r;
-  g('b7').style.background=r===7?'#4ecdc4':'#1e2235'; g('b7').style.color=r===7?'#0d0f18':'#666'; g('b7').style.fontWeight=r===7?'bold':'normal';
-  g('b30').style.background=r===30?'#4ecdc4':'#1e2235'; g('b30').style.color=r===30?'#0d0f18':'#666'; g('b30').style.fontWeight=r===30?'bold':'normal';
+  g('b7').style.background=r===7?'#7c6ef5':'#eceef6'; g('b7').style.color=r===7?'#fff':'#999'; g('b7').style.fontWeight=r===7?'bold':'normal';
+  g('b30').style.background=r===30?'#7c6ef5':'#eceef6'; g('b30').style.color=r===30?'#fff':'#999'; g('b30').style.fontWeight=r===30?'bold':'normal';
   renderChart();
 }
-
-function g(id){return document.getElementById(id);}
+function g(id) { return document.getElementById(id); }
 init();
 </script>
 </body>
